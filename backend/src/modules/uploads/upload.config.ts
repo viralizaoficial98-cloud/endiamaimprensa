@@ -24,6 +24,16 @@ export const UPLOAD_FOLDERS = [
 
 export type UploadFolder = (typeof UPLOAD_FOLDERS)[number];
 
+/** Belt-and-braces alongside the .gitkeep placeholders: multer does not
+ * create missing destination directories itself, and a deploy step (fresh
+ * clone, archive extraction, ...) could in principle still land without them.
+ * Called once at startup — cheap, idempotent, never touches existing files. */
+export function ensureUploadFoldersExist(): void {
+  for (const folder of UPLOAD_FOLDERS) {
+    fs.mkdirSync(path.join(UPLOAD_ROOT, folder), { recursive: true });
+  }
+}
+
 const IMAGE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const AUDIO_MIME_TYPES = new Set(["audio/mpeg", "audio/mp3", "audio/wav", "audio/x-wav", "audio/ogg", "audio/mp4", "audio/x-m4a", "audio/m4a"]);
 const VIDEO_MIME_TYPES = new Set(["video/mp4", "video/webm", "video/quicktime"]);

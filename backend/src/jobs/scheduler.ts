@@ -75,16 +75,20 @@ async function runHourlyJobs() {
   await Promise.all([cleanupExpiredTokens(), archiveOldNotifications()]);
 }
 
-export function startScheduledJobs(): void {
+/** Returns the scheduled tasks so the caller can stop() them on shutdown —
+ * otherwise a SIGTERM/SIGINT during process.exit() can cut off a cron job
+ * mid-write instead of letting it finish or exit cleanly. */
+export function startScheduledJobs(): cron.ScheduledTask[] {
   // Every minute: time-sensitive publication/activation checks.
-  cron.schedule("* * * * *", () => {
+  const frequent = cron.schedule("* * * * *", () => {
     runFrequentJobs().catch((err) => logger.error({ err }, "[cron] Erro ao executar tarefas agendadas frequentes"));
   });
 
   // Every hour: housekeeping.
-  cron.schedule("0 * * * *", () => {
+  const hourly = cron.schedule("0 * * * *", () => {
     runHourlyJobs().catch((err) => logger.error({ err }, "[cron] Erro ao executar tarefas agendadas horárias"));
   });
 
   logger.info("Agendador de tarefas (cron) iniciado.");
+  return [frequent, hourly];
 }

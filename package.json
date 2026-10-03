@@ -6,7 +6,9 @@
     "dev": "next dev",
     "dev:5180": "next dev -p 5180",
     "build": "next build",
-    "start": "next start",
+    "postbuild": "node scripts/copy-standalone-assets.js",
+    "start": "node .next/standalone/server.js",
+    "start:next": "next start",
     "lint": "eslint"
   },
   "dependencies": {

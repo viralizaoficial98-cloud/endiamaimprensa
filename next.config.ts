@@ -25,6 +25,17 @@ function backendRemotePattern() {
 const backendPattern = backendRemotePattern();
 
 const nextConfig: NextConfig = {
+  // Next.js's own self-contained server (next build generates
+  // .next/standalone/server.js) — the officially documented, robust way to
+  // run an App Router production build on a plain Node host like cPanel's
+  // Node Selector, which needs one literal .js "Application Startup File".
+  // A hand-written custom server via the public next() API was tried first
+  // and failed at runtime under the App Router/RSC webpack runtime in this
+  // Next 15 version — this is Next's own generated server, not a
+  // reimplementation, so it doesn't hit that gap. public/ and .next/static
+  // still need copying into .next/standalone after build — see the
+  // "postbuild" npm script.
+  output: "standalone",
   allowedDevOrigins: ["localhost", "127.0.0.1", ...(backendPattern ? [backendPattern.hostname] : [])],
   images: {
     formats: ["image/avif", "image/webp"],
