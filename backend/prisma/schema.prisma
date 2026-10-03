@@ -1,0 +1,1115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────────────────
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  PENDING
+}
+
+enum NewsStatus {
+  DRAFT
+  UNDER_REVIEW
+  APPROVED
+  SCHEDULED
+  PUBLISHED
+  REJECTED
+  ARCHIVED
+  UNPUBLISHED
+}
+
+enum NewsVisibility {
+  PUBLIC
+  PRIVATE
+  INTERNAL
+}
+
+enum ActiveStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum VideoType {
+  UPLOAD
+  YOUTUBE
+  VIMEO
+  EXTERNAL
+}
+
+enum EventStatus {
+  DRAFT
+  UPCOMING
+  ONGOING
+  FINISHED
+  CANCELLED
+}
+
+enum DocumentFileType {
+  PDF
+  DOCX
+  XLSX
+  PPTX
+  ZIP
+  OTHER
+}
+
+enum CommentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SPAM
+}
+
+enum NewsletterSubscriberStatus {
+  PENDING
+  CONFIRMED
+  UNSUBSCRIBED
+}
+
+enum NewsletterCampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENT
+}
+
+enum SettingType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+}
+
+enum SettingGroup {
+  GENERAL
+  APPEARANCE
+  SEO
+  SOCIAL
+  EMAIL
+  SECURITY
+  ANALYTICS
+  PORTAL
+}
+
+enum SocialPlatform {
+  FACEBOOK
+  INSTAGRAM
+  LINKEDIN
+  YOUTUBE
+  TWITTER
+  TIKTOK
+  WHATSAPP
+}
+
+enum ClippingMediaType {
+  IMPRENSA_ESCRITA
+  TELEVISAO
+  RADIO
+  PORTAL_DIGITAL
+  PUBLICACAO_ONLINE
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  INFORMATIVE
+  IMPORTANT
+}
+
+enum TextPosition {
+  LEFT
+  CENTER
+  RIGHT
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// USERS / ROLES / PERMISSIONS
+// ─────────────────────────────────────────────────────────────────────────
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?  @db.Text
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  permissions Permission[] @relation("RolePermissions")
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String  @id @default(cuid())
+  name        String
+  code        String  @unique
+  module      String
+  description String? @db.Text
+
+  roles Role[] @relation("RolePermissions")
+
+  @@map("permissions")
+}
+
+model User {
+  id                  String     @id @default(cuid())
+  name                String
+  email               String     @unique
+  username            String     @unique
+  passwordHash        String
+  phone               String?
+  avatar              String?
+  position            String?
+  department          String?
+  roleId              String
+  role                Role       @relation(fields: [roleId], references: [id])
+  status              UserStatus @default(ACTIVE)
+  mustChangePassword  Boolean    @default(false)
+  lastLoginAt         DateTime?
+  failedLoginAttempts Int        @default(0)
+  lockedUntil         DateTime?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  deletedAt           DateTime?
+
+  authoredNews             News[]               @relation("NewsAuthor")
+  reviewedNews             News[]               @relation("NewsReviewer")
+  newsVersions             NewsVersion[]
+  comments                 Comment[]
+  auditLogs                AuditLog[]
+  refreshTokens            RefreshToken[]
+  passwordResets           PasswordResetToken[]
+  bookmarks                Bookmark[]
+  reactions                Reaction[]
+  interviewsGiven          Interview[]          @relation("InterviewInterviewer")
+  updatedSettings          Setting[]
+  notifications            Notification[]
+  latestNewsConfigsCreated LatestNewsConfig[]   @relation("LatestNewsConfigCreatedBy")
+  latestNewsConfigsUpdated LatestNewsConfig[]   @relation("LatestNewsConfigUpdatedBy")
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash       String    @unique
+  expiresAt       DateTime
+  revokedAt       DateTime?
+  replacedByToken String?
+  ipAddress       String?
+  userAgent       String?   @db.Text
+  createdAt       DateTime  @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// CATEGORIES / TAGS
+// ─────────────────────────────────────────────────────────────────────────
+
+model Category {
+  id            String       @id @default(cuid())
+  name          String
+  nameEn        String?
+  slug          String       @unique
+  description   String?      @db.Text
+  descriptionEn String?      @db.Text
+  image         String?
+  icon          String?
+  color         String?
+  parentId      String?
+  parent        Category?    @relation("CategoryChildren", fields: [parentId], references: [id], onDelete: SetNull)
+  children      Category[]   @relation("CategoryChildren")
+  order         Int          @default(0)
+  status        ActiveStatus @default(ACTIVE)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  news       News[]
+  videos     Video[]
+  podcasts   Podcast[]
+  audios     Audio[]
+  interviews Interview[]
+  documents  Document[]
+  banners    Banner[]
+  clippings  Clipping[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  news    NewsTag[]
+  banners BannerTag[]
+
+  @@map("tags")
+}
+
+model NewsTag {
+  newsId String
+  tagId  String
+  news   News   @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([newsId, tagId])
+  @@map("news_tags")
+}
+
+model BannerTag {
+  bannerId String
+  tagId    String
+  banner   Banner @relation(fields: [bannerId], references: [id], onDelete: Cascade)
+  tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([bannerId, tagId])
+  @@map("banner_tags")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// NEWS
+// ─────────────────────────────────────────────────────────────────────────
+
+model News {
+  id              String         @id @default(cuid())
+  title           String
+  titleEn         String?
+  slug            String         @unique
+  subtitle        String?        @db.Text
+  subtitleEn      String?        @db.Text
+  excerpt         String         @db.Text
+  excerptEn       String?        @db.Text
+  content         Json
+  contentEn       Json?
+  coverImage      String
+  coverImageAlt   String?
+  coverImageAltEn String?
+  categoryId      String
+  category        Category       @relation(fields: [categoryId], references: [id])
+  authorId        String
+  author          User           @relation("NewsAuthor", fields: [authorId], references: [id])
+  reviewerId      String?
+  reviewer        User?          @relation("NewsReviewer", fields: [reviewerId], references: [id])
+  status          NewsStatus     @default(DRAFT)
+  visibility      NewsVisibility @default(PUBLIC)
+  isFeatured      Boolean        @default(false)
+  isBreaking      Boolean        @default(false)
+  isHighlighted   Boolean        @default(false)
+  allowComments   Boolean        @default(true)
+  readingTime     Int            @default(3)
+  viewsCount      Int            @default(0)
+  likesCount      Int            @default(0)
+  sharesCount     Int            @default(0)
+  publishedAt     DateTime?
+  scheduledAt     DateTime?
+  rejectionReason String?        @db.Text
+
+  // SEO
+  seoTitle       String?
+  seoDescription String? @db.Text
+  seoKeywords    String?
+  canonicalUrl   String?
+  ogTitle        String?
+  ogDescription  String? @db.Text
+  ogImage        String?
+  robotsIndex    Boolean @default(true)
+  robotsFollow   Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  tags                        NewsTag[]
+  versions                    NewsVersion[]
+  comments                    Comment[]
+  bookmarks                   Bookmark[]
+  reactions                   Reaction[]
+  banners                     Banner[]
+  newsletterCampaigns         NewsletterCampaignNews[]
+  format                      String                   @default("article")
+  latestNewsItems             LatestNewsItem[]
+  latestNewsBreakingDraft     LatestNewsConfig[]       @relation("LatestNewsBreakingDraft")
+  latestNewsBreakingPublished LatestNewsConfig[]       @relation("LatestNewsBreakingPublished")
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([publishedAt])
+  @@index([isFeatured])
+  @@index([isBreaking])
+  @@index([viewsCount])
+  @@index([status, publishedAt])
+  @@map("news")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// GESTÃO DAS ÚLTIMAS NOTÍCIAS (homepage "Últimas Notícias" curation)
+// ─────────────────────────────────────────────────────────────────────────
+// Single working row: admins edit the draft fields/items freely; "Publicar"
+// copies them into the published* fields + PUBLISHED items atomically. Items
+// only ever store a newsId reference — actual title/image/excerpt/category
+// are always read live from News at request time (draft preview AND public
+// site), so an edit to the original article is reflected automatically and
+// nothing about the article itself is ever duplicated or copied.
+
+enum LatestNewsPosition {
+  MAIN
+  SECONDARY
+}
+
+enum LatestNewsItemState {
+  DRAFT
+  PUBLISHED
+}
+
+model LatestNewsConfig {
+  id String @id @default(cuid())
+
+  // ── Draft (working) fields — always what the admin is currently editing ──
+  title           String  @default("Últimas Notícias")
+  titleEn         String?
+  subtitle        String  @default("Acompanhe as principais actualizações da ENDIAMA e do sector diamantífero.") @db.Text
+  subtitleEn      String? @db.Text
+  showSection     Boolean @default(true)
+  showBreakingBar Boolean @default(true)
+  showViewAll     Boolean @default(true)
+  viewAllLabel    String  @default("Ver todas as notícias")
+  viewAllLabelEn  String?
+
+  breakingNewsId   String?
+  breakingNews     News?     @relation("LatestNewsBreakingDraft", fields: [breakingNewsId], references: [id], onDelete: SetNull)
+  breakingTitle    String? // optional custom display title override (never mutates the original News.title)
+  breakingTitleEn  String?
+  breakingActive   Boolean   @default(true)
+  breakingStartsAt DateTime?
+  breakingEndsAt   DateTime?
+
+  publishAt DateTime? // scheduling structure (see technical report — no cron infra exists yet)
+
+  // ── Published (live) snapshot of the same scalar fields — set only by "Publicar" ──
+  publishedAt               DateTime?
+  publishedTitle            String?
+  publishedTitleEn          String?
+  publishedSubtitle         String?   @db.Text
+  publishedSubtitleEn       String?   @db.Text
+  publishedShowSection      Boolean?
+  publishedShowBreakingBar  Boolean?
+  publishedShowViewAll      Boolean?
+  publishedViewAllLabel     String?
+  publishedViewAllLabelEn   String?
+  publishedBreakingNewsId   String?
+  publishedBreakingNews     News?     @relation("LatestNewsBreakingPublished", fields: [publishedBreakingNewsId], references: [id], onDelete: SetNull)
+  publishedBreakingTitle    String?
+  publishedBreakingTitleEn  String?
+  publishedBreakingActive   Boolean?
+  publishedBreakingStartsAt DateTime?
+  publishedBreakingEndsAt   DateTime?
+
+  createdById String?
+  createdBy   User?   @relation("LatestNewsConfigCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?   @relation("LatestNewsConfigUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items LatestNewsItem[]
+
+  @@map("latest_news_config")
+}
+
+model LatestNewsItem {
+  id        String              @id @default(cuid())
+  configId  String
+  config    LatestNewsConfig    @relation(fields: [configId], references: [id], onDelete: Cascade)
+  newsId    String
+  news      News                @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  position  LatestNewsPosition
+  state     LatestNewsItemState @default(DRAFT)
+  sortOrder Int                 @default(0)
+  active    Boolean             @default(true)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  // A given news article can only occupy ONE slot (MAIN or SECONDARY) at a
+  // time within the same config+state — the DB itself rejects the duplicate
+  // placement the spec calls out ("esta notícia já está configurada...").
+  @@unique([configId, newsId, state])
+  @@index([configId, state, position, sortOrder])
+  @@map("latest_news_items")
+}
+
+model NewsVersion {
+  id            String   @id @default(cuid())
+  newsId        String
+  news          News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  version       Int
+  title         String
+  subtitle      String?  @db.Text
+  excerpt       String   @db.Text
+  content       Json
+  editedById    String
+  editedBy      User     @relation(fields: [editedById], references: [id])
+  changeSummary String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  @@index([newsId])
+  @@map("news_versions")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// BANNERS
+// ─────────────────────────────────────────────────────────────────────────
+
+model Banner {
+  id                    String       @id @default(cuid())
+  title                 String
+  titleEn               String?
+  subtitle              String?      @db.Text
+  subtitleEn            String?      @db.Text
+  description           String?      @db.Text
+  descriptionEn         String?      @db.Text
+  image                 String
+  imageAlt              String?
+  mobileImage           String?
+  videoUrl              String?
+  categoryId            String?
+  category              Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  newsId                String?
+  news                  News?        @relation(fields: [newsId], references: [id], onDelete: SetNull)
+  buttonText            String?
+  buttonTextEn          String?
+  buttonUrl             String?
+  secondaryButtonText   String?
+  secondaryButtonTextEn String?
+  secondaryButtonUrl    String?
+  overlayOpacity        Float        @default(0.5)
+  textPosition          TextPosition @default(LEFT)
+  order                 Int          @default(0)
+  status                ActiveStatus @default(ACTIVE)
+  startsAt              DateTime?
+  endsAt                DateTime?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  tags BannerTag[]
+
+  @@index([status, order])
+  @@map("banners")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// VIDEOS
+// ─────────────────────────────────────────────────────────────────────────
+
+model Video {
+  id            String        @id @default(cuid())
+  title         String
+  titleEn       String?
+  slug          String        @unique
+  description   String?       @db.Text
+  descriptionEn String?       @db.Text
+  thumbnail     String
+  thumbnailAlt  String?
+  videoUrl      String
+  videoType     VideoType     @default(UPLOAD)
+  duration      Int           @default(0)
+  categoryId    String
+  category      Category      @relation(fields: [categoryId], references: [id])
+  authorName    String?
+  status        PublishStatus @default(DRAFT)
+  isFeatured    Boolean       @default(false)
+  viewsCount    Int           @default(0)
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status])
+  @@index([status, publishedAt])
+  @@map("videos")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// AUDIOS — declarações, entrevistas em áudio, comunicados e outros
+// conteúdos sonoros institucionais da Sala de Imprensa (não "podcasts").
+// ─────────────────────────────────────────────────────────────────────────
+
+model Audio {
+  id            String        @id @default(cuid())
+  title         String
+  titleEn       String?
+  slug          String        @unique
+  description   String?       @db.Text
+  descriptionEn String?       @db.Text
+  coverImage    String
+  audioUrl      String
+  duration      Int           @default(0)
+  categoryId    String?
+  category      Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  interviewee   String?
+  location      String?
+  eventId       String?
+  event         Event?        @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  status        PublishStatus @default(DRAFT)
+  isFeatured    Boolean       @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status])
+  @@index([status, publishedAt])
+  @@index([isFeatured])
+  @@map("audios")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// PODCASTS
+// ─────────────────────────────────────────────────────────────────────────
+
+model Podcast {
+  id          String        @id @default(cuid())
+  title       String
+  slug        String        @unique
+  description String?       @db.Text
+  coverImage  String
+  author      String?
+  categoryId  String?
+  category    Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  status      PublishStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  episodes PodcastEpisode[]
+
+  @@map("podcasts")
+}
+
+model PodcastEpisode {
+  id            String        @id @default(cuid())
+  podcastId     String
+  podcast       Podcast       @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  title         String
+  slug          String        @unique
+  description   String?       @db.Text
+  audioUrl      String
+  duration      Int           @default(0)
+  episodeNumber Int
+  seasonNumber  Int?
+  publishedAt   DateTime?
+  status        PublishStatus @default(DRAFT)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([podcastId])
+  @@map("podcast_episodes")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// GALLERIES
+// ─────────────────────────────────────────────────────────────────────────
+
+model GalleryCategory {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subcategories GallerySubcategory[]
+  galleries     Gallery[]
+
+  @@map("gallery_categories")
+}
+
+model GallerySubcategory {
+  id                String          @id @default(cuid())
+  galleryCategoryId String
+  galleryCategory   GalleryCategory @relation(fields: [galleryCategoryId], references: [id], onDelete: Cascade)
+  name              String
+  slug              String          @unique
+  order             Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  galleries Gallery[]
+
+  @@map("gallery_subcategories")
+}
+
+model Gallery {
+  id                   String              @id @default(cuid())
+  title                String
+  titleEn              String?
+  slug                 String              @unique
+  description          String?             @db.Text
+  descriptionEn        String?             @db.Text
+  coverImage           String
+  galleryCategoryId    String
+  galleryCategory      GalleryCategory     @relation(fields: [galleryCategoryId], references: [id])
+  gallerySubcategoryId String?
+  gallerySubcategory   GallerySubcategory? @relation(fields: [gallerySubcategoryId], references: [id], onDelete: SetNull)
+  eventDate            DateTime?
+  location             String?
+  photographer         String?
+  status               PublishStatus       @default(DRAFT)
+  isFeatured           Boolean             @default(false)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  images GalleryImage[]
+
+  @@index([status])
+  @@index([galleryCategoryId])
+  @@index([status, eventDate])
+  @@map("galleries")
+}
+
+model GalleryImage {
+  id           String   @id @default(cuid())
+  galleryId    String
+  gallery      Gallery  @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+  imageUrl     String
+  thumbnailUrl String?
+  caption      String?  @db.Text
+  captionEn    String?  @db.Text
+  altText      String
+  altTextEn    String?
+  credit       String?
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@index([galleryId])
+  @@map("gallery_images")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// INTERVIEWS
+// ─────────────────────────────────────────────────────────────────────────
+
+model Interview {
+  id                  String        @id @default(cuid())
+  title               String
+  slug                String        @unique
+  excerpt             String        @db.Text
+  content             Json
+  intervieweeName     String
+  intervieweePosition String?
+  intervieweeCompany  String?
+  intervieweePhoto    String?
+  coverImage          String
+  interviewerId       String?
+  interviewer         User?         @relation("InterviewInterviewer", fields: [interviewerId], references: [id], onDelete: SetNull)
+  categoryId          String?
+  category            Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  videoUrl            String?
+  audioUrl            String?
+  status              PublishStatus @default(DRAFT)
+  publishedAt         DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([status])
+  @@map("interviews")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────────────────────────────────
+
+model Event {
+  id              String      @id @default(cuid())
+  title           String
+  titleEn         String?
+  slug            String      @unique
+  description     String?     @db.Text
+  descriptionEn   String?     @db.Text
+  coverImage      String
+  location        String?
+  locationEn      String?
+  address         String?     @db.Text
+  latitude        Float?
+  longitude       Float?
+  startDate       DateTime
+  endDate         DateTime?
+  startTime       String?
+  endTime         String?
+  registrationUrl String?
+  organizer       String?
+  contactEmail    String?
+  contactPhone    String?
+  capacity        Int?
+  status          EventStatus @default(UPCOMING)
+  isFeatured      Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  audios Audio[]
+
+  @@index([status])
+  @@index([startDate])
+  @@index([status, startDate])
+  @@map("events")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// DOCUMENTS
+// ─────────────────────────────────────────────────────────────────────────
+
+model Document {
+  id             String           @id @default(cuid())
+  title          String
+  titleEn        String?
+  slug           String           @unique
+  description    String?          @db.Text
+  descriptionEn  String?          @db.Text
+  fileUrl        String
+  fileName       String
+  fileType       DocumentFileType @default(PDF)
+  fileSize       Int              @default(0)
+  coverImage     String?
+  categoryId     String?
+  category       Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  documentDate   DateTime?
+  status         PublishStatus    @default(PUBLISHED)
+  downloadsCount Int              @default(0)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@map("documents")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// CLIPPING
+// ─────────────────────────────────────────────────────────────────────────
+
+model Clipping {
+  id           String            @id @default(cuid())
+  title        String
+  source       String
+  clippingDate DateTime
+  mediaType    ClippingMediaType @default(PORTAL_DIGITAL)
+  categoryId   String?
+  category     Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  description  String?           @db.Text
+  url          String?
+  documentUrl  String?
+  imageUrl     String?
+  status       PublishStatus     @default(PUBLISHED)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([status])
+  @@index([clippingDate])
+  @@index([mediaType])
+  @@map("clippings")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// COMMENTS
+// ─────────────────────────────────────────────────────────────────────────
+
+model Comment {
+  id         String        @id @default(cuid())
+  newsId     String
+  news       News          @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  parentId   String?
+  parent     Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    Comment[]     @relation("CommentReplies")
+  userId     String?
+  user       User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  guestName  String?
+  guestEmail String?
+  content    String        @db.Text
+  status     CommentStatus @default(PENDING)
+  ipAddress  String?
+  userAgent  String?       @db.Text
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([newsId])
+  @@map("comments")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// NEWSLETTER
+// ─────────────────────────────────────────────────────────────────────────
+
+model NewsletterSubscriber {
+  id                String                     @id @default(cuid())
+  name              String?
+  email             String                     @unique
+  status            NewsletterSubscriberStatus @default(PENDING)
+  confirmationToken String?
+  confirmedAt       DateTime?
+  unsubscribedAt    DateTime?
+  createdAt         DateTime                   @default(now())
+
+  @@map("newsletter_subscribers")
+}
+
+model NewsletterCampaign {
+  id              String                   @id @default(cuid())
+  subject         String
+  title           String
+  content         String                   @db.Text
+  status          NewsletterCampaignStatus @default(DRAFT)
+  scheduledAt     DateTime?
+  sentAt          DateTime?
+  recipientsCount Int                      @default(0)
+  openedCount     Int                      @default(0)
+  clickedCount    Int                      @default(0)
+  createdAt       DateTime                 @default(now())
+
+  news NewsletterCampaignNews[]
+
+  @@map("newsletter_campaigns")
+}
+
+model NewsletterCampaignNews {
+  campaignId String
+  newsId     String
+  order      Int                @default(0)
+  campaign   NewsletterCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  news       News               @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@id([campaignId, newsId])
+  @@map("newsletter_campaign_news")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// MENUS
+// ─────────────────────────────────────────────────────────────────────────
+
+model Menu {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items MenuItem[]
+
+  @@map("menus")
+}
+
+model MenuItem {
+  id           String     @id @default(cuid())
+  menuId       String
+  menu         Menu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  parentId     String?
+  parent       MenuItem?  @relation("MenuItemChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children     MenuItem[] @relation("MenuItemChildren")
+  label        String
+  url          String
+  icon         String?
+  order        Int        @default(0)
+  isExternal   Boolean    @default(false)
+  openInNewTab Boolean    @default(false)
+  isVisible    Boolean    @default(true)
+  isMegaMenu   Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([menuId])
+  @@map("menu_items")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// SETTINGS / SOCIAL / PARTNERS / ADVERTISEMENTS
+// ─────────────────────────────────────────────────────────────────────────
+
+model Setting {
+  id          String       @id @default(cuid())
+  key         String       @unique
+  value       String?
+  type        SettingType  @default(STRING)
+  group       SettingGroup @default(GENERAL)
+  description String?      @db.Text
+  updatedById String?
+  updatedBy   User?        @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime     @updatedAt
+
+  @@map("settings")
+}
+
+model SocialLink {
+  id        String         @id @default(cuid())
+  platform  SocialPlatform
+  url       String
+  icon      String?
+  order     Int            @default(0)
+  isActive  Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@map("social_links")
+}
+
+model Partner {
+  id          String       @id @default(cuid())
+  name        String
+  logo        String
+  website     String?
+  description String?      @db.Text
+  order       Int          @default(0)
+  status      ActiveStatus @default(ACTIVE)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([status, order])
+  @@map("partners")
+}
+
+model Advertisement {
+  id          String       @id @default(cuid())
+  title       String
+  image       String
+  mobileImage String?
+  url         String?
+  position    String
+  startsAt    DateTime?
+  endsAt      DateTime?
+  impressions Int          @default(0)
+  clicks      Int          @default(0)
+  status      ActiveStatus @default(ACTIVE)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("advertisements")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// METRICS / ENGAGEMENT
+// ─────────────────────────────────────────────────────────────────────────
+
+model ContentView {
+  id              String   @id @default(cuid())
+  contentType     String
+  contentId       String
+  ipAddress       String?
+  sessionId       String?
+  userAgent       String?  @db.Text
+  referrer        String?  @db.Text
+  country         String?
+  city            String?
+  device          String?
+  browser         String?
+  operatingSystem String?
+  createdAt       DateTime @default(now())
+
+  @@index([contentType, contentId])
+  @@index([createdAt])
+  @@map("content_views")
+}
+
+model Bookmark {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contentType String
+  contentId   String
+  newsId      String?
+  news        News?    @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, contentType, contentId])
+  @@map("bookmarks")
+}
+
+model Reaction {
+  id          String       @id @default(cuid())
+  userId      String?
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionId   String?
+  contentType String
+  contentId   String
+  newsId      String?
+  news        News?        @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  type        ReactionType @default(LIKE)
+  createdAt   DateTime     @default(now())
+
+  @@index([contentType, contentId])
+  @@map("reactions")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// AUDIT
+// ─────────────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  module    String
+  entity    String?
+  entityId  String?
+  oldData   Json?
+  newData   Json?
+  ipAddress String?
+  userAgent String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([module])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String    @db.Text
+  type      String    @default("INFO")
+  link      String?
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("notifications")
+}

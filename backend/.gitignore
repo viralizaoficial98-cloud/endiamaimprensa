@@ -1,0 +1,33 @@
+# dependencies / build output
+node_modules/
+dist/
+
+# env files — never commit real credentials
+.env
+.env.*
+!.env.example
+
+# uploaded media — not versioned, lives on the server/filesystem. The
+# per-folder .gitkeep placeholders ARE tracked so a fresh clone recreates the
+# exact directory structure multer expects (it does not auto-create missing
+# destination folders).
+uploads/**
+!uploads/**/
+!uploads/**/.gitkeep
+
+# database backups / data exports
+migration-backup/
+postgres-export.json
+*.sql
+*.sql.gz
+*.dump
+
+# archived PostgreSQL-dialect migrations (superseded by MySQL)
+prisma/migrations-postgresql-backup/
+
+# logs
+logs/
+*.log
+
+# typescript
+*.tsbuildinfo

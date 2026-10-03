@@ -1,0 +1,102 @@
+{
+  "nav": {
+    "home": "Home",
+    "news": "News",
+    "interviews": "Interviews",
+    "events": "Events",
+    "documents": "Documents",
+    "videos": "Videos",
+    "gallery": "Gallery",
+    "audios": "Audios",
+    "clipping": "Clipping",
+    "contact": "Contact",
+    "categories": "Categories",
+    "adminArea": "Administrative Area",
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "language": {
+    "portuguese": "Português",
+    "english": "English",
+    "switchTo": "Switch to {language}"
+  },
+  "search": {
+    "placeholder": "Search...",
+    "modalPlaceholder": "Search news, categories, topics...",
+    "portalPlaceholder": "Search the portal",
+    "ariaLabel": "Search",
+    "close": "Close search",
+    "noResults": "No results found",
+    "noResultsFor": "No results for “{query}”.",
+    "startTyping": "Start typing to search.",
+    "searching": "Searching...",
+    "viewAllResults": "View all results"
+  },
+  "theme": {
+    "toggle": "Toggle theme"
+  },
+  "common": {
+    "loading": "Loading...",
+    "noResults": "No results found",
+    "viewAll": "View All",
+    "readArticle": "Read Article",
+    "loadMore": "Load More",
+    "previousPage": "Previous Page",
+    "nextPage": "Next Page",
+    "back": "Back",
+    "share": "Share",
+    "publishedOn": "Published on",
+    "by": "By",
+    "minutesRead": "{minutes} min read",
+    "photos": "Photos",
+    "relatedVideos": "Related Videos",
+    "relatedNews": "Related News",
+    "error": "Something went wrong. Please try again.",
+    "retry": "Retry",
+    "close": "Close",
+    "readMore": "Read more",
+    "bookmarkArticle": "Save article",
+    "documents": "Documents"
+  },
+  "home": {
+    "latestNews": "Latest News",
+    "mostRead": "Most Read",
+    "latestVideos": "Latest Videos",
+    "premiumGallery": "Premium Gallery",
+    "breakingNews": "Breaking News",
+    "viewAllNews": "View all news"
+  },
+  "footer": {
+    "quickLinks": "Quick Links",
+    "institutional": "Institutional",
+    "aboutEndiama": "About ENDIAMA",
+    "endiamaGroup": "ENDIAMA Group",
+    "sustainability": "Sustainability",
+    "socialResponsibility": "Social Responsibility",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfUse": "Terms of Use",
+    "newsletterTitle": "Newsletter",
+    "newsletterText": "Receive the latest ENDIAMA news by email.",
+    "subscribe": "Subscribe",
+    "latestNews": "Latest News",
+    "categories": "Categories",
+    "tagline": "Empresa Nacional de Diamantes de Angola, E.P. Serving the sustainable development of the Angolan mining sector for 45 years.",
+    "rightsReserved": "All rights reserved.",
+    "premiumPortal": "Premium News Portal"
+  },
+  "gallery": {
+    "searchPlaceholder": "Search galleries...",
+    "photoCount": "{count} photos",
+    "loadMore": "Load more galleries"
+  },
+  "translation": {
+    "pending": "EN translation pending"
+  },
+  "newsletter": {
+    "emailPlaceholder": "Your email",
+    "subscribe": "Subscribe",
+    "success": "Subscription confirmed. Check your email to verify it.",
+    "error": "Could not subscribe. Please try again."
+  }
+}
