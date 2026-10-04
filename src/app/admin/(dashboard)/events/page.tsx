@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { adminDelete, adminGet, adminPatch, adminPost, adminUploadFile } from "@/infrastructure/api/admin-http-client";
+import { revalidateContentCache } from "@/infrastructure/api/revalidate-client";
 
 type EventStatus = "DRAFT" | "UPCOMING" | "ONGOING" | "FINISHED" | "CANCELLED";
 
@@ -97,6 +98,7 @@ export default function AdminEventsPage() {
         status: form.status,
       });
       setForm(EMPTY_FORM);
+      await revalidateContentCache(["events"]);
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao criar evento.");
@@ -107,12 +109,14 @@ export default function AdminEventsPage() {
 
   async function handleStatusChange(row: EventRow, status: EventStatus) {
     await adminPatch(`/admin/events/${row.id}`, { status });
+    await revalidateContentCache(["events"]);
     load();
   }
 
   async function handleDelete(id: string) {
     if (!window.confirm("Remover este evento?")) return;
     await adminDelete(`/admin/events/${id}`);
+    await revalidateContentCache(["events"]);
     load();
   }
 

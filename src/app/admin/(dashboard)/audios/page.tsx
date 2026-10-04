@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { HiOutlinePause, HiOutlinePlay } from "react-icons/hi2";
 import { adminDelete, adminGet, adminPatch, adminPost, adminUploadFile } from "@/infrastructure/api/admin-http-client";
+import { revalidateContentCache } from "@/infrastructure/api/revalidate-client";
 
 type PublishStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
@@ -130,6 +131,7 @@ export default function AdminAudiosPage() {
         status: form.status,
       });
       setForm(EMPTY_FORM);
+      await revalidateContentCache(["audios"]);
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao criar áudio.");
@@ -140,17 +142,20 @@ export default function AdminAudiosPage() {
 
   async function handleStatusChange(row: AudioRow, status: PublishStatus) {
     await adminPatch(`/admin/audios/${row.id}`, { status });
+    await revalidateContentCache(["audios"]);
     load();
   }
 
   async function handleToggleFeatured(row: AudioRow) {
     await adminPatch(`/admin/audios/${row.id}`, { isFeatured: !row.isFeatured });
+    await revalidateContentCache(["audios"]);
     load();
   }
 
   async function handleDelete(id: string) {
     if (!window.confirm("Remover este áudio?")) return;
     await adminDelete(`/admin/audios/${id}`);
+    await revalidateContentCache(["audios"]);
     load();
   }
 

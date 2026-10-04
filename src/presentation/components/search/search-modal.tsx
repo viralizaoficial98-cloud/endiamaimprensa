@@ -37,7 +37,7 @@ export function SearchModal({ open, onClose }: { open: boolean; onClose: () => v
       });
     }, 180);
     return () => clearTimeout(timeout);
-  }, [query]);
+  }, [query, locale]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {

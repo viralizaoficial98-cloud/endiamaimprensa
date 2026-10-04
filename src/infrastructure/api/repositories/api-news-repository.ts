@@ -55,7 +55,14 @@ export class ApiNewsRepository implements NewsRepository {
   }
 
   async getByCategory(categorySlug: string, limit = 8, locale = "pt"): Promise<News[]> {
-    const data = await apiGet<NewsDto[]>(`/public/categories/${categorySlug}/news${buildQuery({ limit, locale })}`);
+    // deriveCacheTag() in http-client.ts would tag this "categories" (the
+    // segment right after "public"), not "news" — so publishing/editing a
+    // news article alone would never invalidate this listing. Overriding the
+    // tags here covers both: a news mutation OR a category mutation
+    // correctly refreshes it.
+    const data = await apiGet<NewsDto[]>(`/public/categories/${categorySlug}/news${buildQuery({ limit, locale })}`, {
+      next: { tags: ["news", "categories"] },
+    });
     return data.map(mapNews);
   }
 

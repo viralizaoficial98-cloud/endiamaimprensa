@@ -53,7 +53,10 @@ function writeToneWav(filename: string, seconds: number, frequencyHz: number): n
   return Math.round(seconds);
 }
 
-const API_BASE = process.env.API_BASE_URL ?? "http://10.23.10.52:4000";
+// Dev-only seed script — audioUrl needs an absolute backend origin (the file
+// is served from backend/uploads/, a different origin than the frontend).
+// localhost is the only safe default; never hardcode a specific machine's LAN IP.
+const API_BASE = process.env.API_BASE_URL ?? "http://localhost:4000";
 
 const DEMO_AUDIOS = [
   {

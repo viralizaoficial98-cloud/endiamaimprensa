@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { adminDelete, adminGetPaginated, adminPost } from "@/infrastructure/api/admin-http-client";
+import { revalidateContentCache } from "@/infrastructure/api/revalidate-client";
 
 interface CategoryRow {
   id: string;
@@ -42,6 +43,7 @@ export default function AdminCategoriesPage() {
       await adminPost("/admin/categories", { name, description: description || undefined });
       setName("");
       setDescription("");
+      await revalidateContentCache(["categories", "news"]);
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao criar categoria.");
@@ -54,6 +56,7 @@ export default function AdminCategoriesPage() {
     if (!window.confirm("Remover esta categoria?")) return;
     try {
       await adminDelete(`/admin/categories/${id}`);
+      await revalidateContentCache(["categories", "news"]);
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao remover categoria.");

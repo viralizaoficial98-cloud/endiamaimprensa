@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { adminDelete, adminGetPaginated, adminPatch, adminPost, adminUploadFile } from "@/infrastructure/api/admin-http-client";
+import { revalidateContentCache } from "@/infrastructure/api/revalidate-client";
 
 interface CategoryOption {
   id: string;
@@ -125,6 +126,7 @@ export default function AdminDocumentsPage() {
         await adminPost("/admin/documents", payload);
       }
       cancelEdit();
+      await revalidateContentCache(["documents"]);
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao guardar documento.");
@@ -136,12 +138,14 @@ export default function AdminDocumentsPage() {
   async function toggleStatus(row: DocumentRow) {
     const status = row.status === "PUBLISHED" ? "ARCHIVED" : "PUBLISHED";
     await adminPatch(`/admin/documents/${row.id}`, { status });
+    await revalidateContentCache(["documents"]);
     load();
   }
 
   async function handleDelete(id: string) {
     if (!window.confirm("Remover este documento?")) return;
     await adminDelete(`/admin/documents/${id}`);
+    await revalidateContentCache(["documents"]);
     load();
   }
 
