@@ -23,6 +23,7 @@ export function getPrimaryNavLinks(t: Translate): NavLink[] {
     { label: t("nav.gallery"), href: "/galeria" },
     { label: t("nav.audios"), href: "/audios" },
     { label: t("nav.clipping"), href: "/clipping" },
+    { label: t("nav.historicalArchive"), href: "/arquivo-historico" },
     { label: t("nav.contact"), href: "/contacto" },
   ];
 }

@@ -49,6 +49,9 @@ const nextConfig: NextConfig = {
       // admin hasn't uploaded a custom thumbnail.
       { protocol: "https", hostname: "img.youtube.com" },
       { protocol: "https", hostname: "i.ytimg.com" },
+      // Historical archive (old WordPress site) — featured images referenced
+      // live by URL, never copied into this project's own uploads.
+      { protocol: "https", hostname: "endiamaimprensa.com", pathname: "/wp-content/uploads/**" },
     ],
   },
 };

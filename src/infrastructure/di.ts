@@ -11,6 +11,7 @@ import { ApiCommentRepository } from "./api/repositories/api-comment-repository"
 import { ApiDocumentRepository } from "./api/repositories/api-document-repository";
 import { ApiEventRepository } from "./api/repositories/api-event-repository";
 import { ApiGalleryRepository } from "./api/repositories/api-gallery-repository";
+import { ApiHistoricalNewsRepository } from "./api/repositories/api-historical-news-repository";
 import { ApiInterviewRepository } from "./api/repositories/api-interview-repository";
 import { ApiLatestNewsRepository } from "./api/repositories/api-latest-news-repository";
 import { ApiNewsRepository } from "./api/repositories/api-news-repository";
@@ -33,4 +34,5 @@ export const repositories = {
   category: new ApiCategoryRepository(),
   comment: new ApiCommentRepository(),
   socialLink: new ApiSocialLinkRepository(),
+  historicalNews: new ApiHistoricalNewsRepository(),
 };

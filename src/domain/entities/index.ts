@@ -8,6 +8,7 @@ export * from "./document";
 export * from "./event";
 export * from "./gallery-category";
 export * from "./gallery-item";
+export * from "./historical-news";
 export * from "./interview";
 export * from "./latest-news";
 export * from "./news";

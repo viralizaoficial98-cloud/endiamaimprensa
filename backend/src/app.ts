@@ -42,6 +42,7 @@ import { analyticsRouter } from "./modules/analytics/analytics.routes";
 import { auditRouter } from "./modules/audit/audit.routes";
 import { notificationsRouter } from "./modules/notifications/notifications.routes";
 import { homeRouter } from "./modules/home/home.routes";
+import { historicalArchivePublicRouter } from "./modules/historical-archive/historical-archive.routes";
 import { getLatest as getLatestNews } from "./modules/news/news.service";
 
 export function createApp(): Express {
@@ -127,6 +128,7 @@ export function createApp(): Express {
   app.use("/api/public/social-links", socialLinksPublicRouter);
   app.use("/api/public/partners", partnersPublicRouter);
   app.use("/api/public/advertisements", advertisementsPublicRouter);
+  app.use("/api/public/historical-archive", historicalArchivePublicRouter);
 
   // ── Admin API ────────────────────────────────────────────────────────────
   app.use("/api/admin/news", newsAdminRouter);

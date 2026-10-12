@@ -1,4 +1,4 @@
-import type { Author, Category, Clipping, ClippingMediaType, EndiamaAudio, EndiamaBanner, EndiamaDocument, EndiamaEvent, GalleryAlbum, GalleryAlbumSummary, GalleryCategory, GalleryItemCategoryRef, GalleryPhoto, Interview, LatestNewsSectionData, News, NewsBlock, NewsComment, Partner, SocialLink, Tag, Video } from "@/domain/entities";
+import type { Author, Category, Clipping, ClippingMediaType, EndiamaAudio, EndiamaBanner, EndiamaDocument, EndiamaEvent, GalleryAlbum, GalleryAlbumSummary, GalleryCategory, GalleryItemCategoryRef, GalleryPhoto, HistoricalNews, Interview, LatestNewsSectionData, News, NewsBlock, NewsComment, Partner, SocialLink, Tag, Video } from "@/domain/entities";
 import { resolveMediaUrl, getCategoryFallback, INTERVIEW_PROFILE_FALLBACK } from "@/lib/media";
 import { getPartnerInitials } from "@/lib/partner-initials";
 import type {
@@ -15,6 +15,7 @@ import type {
   GalleryDto,
   GalleryImageDto,
   GalleryListItemDto,
+  HistoricalNewsDto,
   InterviewDto,
   LatestNewsSectionDto,
   NewsBlockDto,
@@ -289,6 +290,17 @@ export function mapDocument(dto: DocumentDto): EndiamaDocument {
     documentDate: dto.documentDate,
     publishedAt: dto.createdAt,
     downloadUrl: dto.fileUrl,
+  };
+}
+
+export function mapHistoricalNews(dto: HistoricalNewsDto): HistoricalNews {
+  return {
+    id: dto.id,
+    title: dto.title,
+    excerpt: dto.excerpt,
+    publishedAt: dto.publishedAt,
+    sourceUrl: dto.sourceUrl,
+    image: dto.image,
   };
 }
 

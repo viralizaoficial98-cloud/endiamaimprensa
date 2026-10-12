@@ -28,6 +28,16 @@ export const env = {
 
   apiBaseUrl: process.env.API_BASE_URL ?? `http://localhost:${process.env.PORT ?? 4000}`,
 
+  // Read-only source for the historical news archive (old WordPress site,
+  // category "news" / id 5) — see modules/historical-archive. Never used for
+  // anything but GET requests; no admin credentials involved.
+  wordpressArchiveUrl: process.env.WORDPRESS_ARCHIVE_URL ?? "https://endiamaimprensa.com",
+  wordpressArchiveCategoryId: Number(process.env.WORDPRESS_ARCHIVE_CATEGORY_ID ?? 5),
+  // The old site is slow and the archive never changes retroactively, so a
+  // long TTL is both safe and considerate towards it (one full refresh per
+  // window, regardless of how many visitors search the archive meanwhile).
+  wordpressArchiveCacheMinutes: Number(process.env.WORDPRESS_ARCHIVE_CACHE_MINUTES ?? 60),
+
   // 25MB comfortably covers images/audio; video uploads need much more headroom.
   uploadMaxSizeMb: Number(process.env.UPLOAD_MAX_SIZE_MB ?? 200),
 

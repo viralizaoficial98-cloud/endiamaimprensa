@@ -237,6 +237,15 @@ export interface DocumentDto {
   createdAt: string;
 }
 
+export interface HistoricalNewsDto {
+  id: number;
+  title: string;
+  excerpt: string;
+  publishedAt: string;
+  sourceUrl: string;
+  image: { url: string; alt: string } | null;
+}
+
 export interface ClippingDto {
   id: string;
   title: string;

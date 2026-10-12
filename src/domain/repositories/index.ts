@@ -6,6 +6,7 @@ export * from "./comment-repository";
 export * from "./document-repository";
 export * from "./event-repository";
 export * from "./gallery-repository";
+export * from "./historical-news-repository";
 export * from "./interview-repository";
 export * from "./latest-news-repository";
 export * from "./news-repository";
