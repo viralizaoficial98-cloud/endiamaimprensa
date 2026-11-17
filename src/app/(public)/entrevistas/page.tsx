@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getLocale } from "next-intl/server";
 import { getAllCategories } from "@/application/use-cases/category-use-cases";
 import { getLatestInterviews } from "@/application/use-cases/interview-use-cases";
@@ -6,10 +7,11 @@ import { InterviewsExplorer } from "@/presentation/components/interviews/intervi
 import { Container } from "@/presentation/components/ui/container";
 import { Reveal } from "@/presentation/components/ui/reveal";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Entrevistas",
   description: "Conversas com quem lidera e constrói o sector diamantífero angolano.",
-};
+  path: "/entrevistas",
+});
 
 export default async function EntrevistasPage() {
   const locale = await getLocale();

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Fragment } from "react";
 import { letterChild, letterContainer } from "@/presentation/animations/variants";
 import { cn } from "@/lib/utils";
 
@@ -28,13 +29,21 @@ export function AnimatedTitle({
       aria-label={text}
     >
       {words.map((word, wordIndex) => (
-        <span key={wordIndex} className="mr-[0.28em] flex overflow-hidden">
-          {word.split("").map((letter, letterIndex) => (
-            <motion.span key={letterIndex} variants={letterChild} className="inline-block">
-              {letter}
-            </motion.span>
-          ))}
-        </span>
+        <Fragment key={wordIndex}>
+          {/* Real space character between words: the visual gap comes from the
+              margin below (whitespace-only text between flex items is not
+              rendered, so the layout is unchanged), but crawlers, copy-paste
+              and reader modes read the H1's text content — without it the
+              words ran together ("ENDIAMAanunciaresultados…"). */}
+          {wordIndex > 0 ? " " : null}
+          <span className="mr-[0.28em] flex overflow-hidden">
+            {word.split("").map((letter, letterIndex) => (
+              <motion.span key={letterIndex} variants={letterChild} className="inline-block">
+                {letter}
+              </motion.span>
+            ))}
+          </span>
+        </Fragment>
       ))}
     </motion.h1>
   );

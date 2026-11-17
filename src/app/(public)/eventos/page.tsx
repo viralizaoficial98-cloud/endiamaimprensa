@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import Link from "next/link";
 import { HiOutlineArrowUpRight, HiOutlineCalendarDays, HiOutlineMapPin } from "react-icons/hi2";
 import { getArchivedEvents, getUpcomingEvents } from "@/application/use-cases/event-use-cases";
@@ -7,10 +8,11 @@ import { EventsSection } from "@/presentation/components/home/events-section";
 import { Container } from "@/presentation/components/ui/container";
 import { Reveal, RevealGroup, RevealItem } from "@/presentation/components/ui/reveal";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Eventos",
   description: "Agenda de eventos institucionais da ENDIAMA E.P.",
-};
+  path: "/eventos",
+});
 
 const FULL_DATE_FORMATTER = new Intl.DateTimeFormat("pt-PT", { day: "2-digit", month: "long", year: "numeric", timeZone: "Africa/Luanda" });
 

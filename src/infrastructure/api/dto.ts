@@ -63,6 +63,15 @@ export interface NewsDto {
   format: string;
   isBreaking: boolean;
   isFeatured: boolean;
+  // Editorial SEO fields (already stored and returned by the API).
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  canonicalUrl?: string | null;
+  ogTitle?: string | null;
+  ogDescription?: string | null;
+  ogImage?: string | null;
+  robotsIndex?: boolean;
+  robotsFollow?: boolean;
 }
 
 export interface VideoDto {
@@ -76,6 +85,7 @@ export interface VideoDto {
   duration: number;
   category: CategoryDto;
   publishedAt: string | null;
+  updatedAt?: string;
   viewsCount: number;
 }
 
@@ -105,6 +115,7 @@ export interface GalleryCategoryDto extends GalleryCategoryRefDto {
 }
 
 export interface GalleryDto {
+  updatedAt?: string;
   id: string;
   slug: string;
   title: string;
@@ -122,6 +133,7 @@ export interface GalleryDto {
  * `images[]` array for a list request, only a count, so the "Galeria Premium"
  * grid stays fast no matter how many photos an album holds. */
 export interface GalleryListItemDto {
+  updatedAt?: string;
   id: string;
   slug: string;
   title: string;
@@ -135,6 +147,7 @@ export interface GalleryListItemDto {
 }
 
 export interface InterviewDto {
+  updatedAt?: string;
   id: string;
   slug: string;
   title: string;
@@ -153,6 +166,7 @@ export interface InterviewDto {
 }
 
 export interface EventDto {
+  updatedAt?: string;
   id: string;
   slug: string;
   title: string;
@@ -210,6 +224,7 @@ export interface LatestNewsSectionDto {
 }
 
 export interface AudioDto {
+  updatedAt?: string;
   id: string;
   slug: string;
   title: string;

@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { breadcrumbJsonLd, galleryJsonLd, jsonLdGraph } from "@/lib/seo/json-ld";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { absoluteUrl } from "@/lib/site";
+import { JsonLd } from "@/presentation/components/seo/json-ld";
 import { HiOutlineCalendar, HiOutlinePhoto } from "react-icons/hi2";
 import { getGalleryAlbumBySlug } from "@/application/use-cases/gallery-use-cases";
 import { GalleryDetailGrid } from "@/presentation/components/gallery/gallery-detail-grid";
@@ -12,11 +16,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const album = await getGalleryAlbumBySlug(slug);
   if (!album) return { title: "Galeria" };
-  return {
+  return buildPageMetadata({
     title: album.title,
     description: album.description ?? `${album.photoCount} fotografias — ${album.category.name}, ENDIAMA E.P.`,
-    openGraph: { images: [{ url: album.coverImage }] },
-  };
+    path: `/galeria/${album.slug}`,
+    image: { url: album.coverImage, alt: album.title },
+  });
 }
 
 export default async function GalleryAlbumPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -24,8 +29,16 @@ export default async function GalleryAlbumPage({ params }: { params: Promise<{ s
   const album = await getGalleryAlbumBySlug(slug);
   if (!album) notFound();
 
+  const canonicalUrl = absoluteUrl(`/galeria/${album.slug}`);
+
   return (
     <div className="pb-24 pt-36 sm:pt-40">
+      <JsonLd
+        data={jsonLdGraph([
+          galleryJsonLd(album, canonicalUrl),
+          breadcrumbJsonLd([{ name: "Início", path: "/" }, { name: "Galeria", path: "/galeria" }, { name: album.title }]),
+        ])}
+      />
       <Container>
         <Reveal className="max-w-3xl">
           <CategoryBadge name={album.category.name} slug={album.category.slug} size="md" />

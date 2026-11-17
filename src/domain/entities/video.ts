@@ -15,5 +15,8 @@ export interface Video {
   durationSeconds: number;
   category: Category;
   publishedAt: string;
+  /** Real publication date from the CMS (publishedAt above falls back to "now" for display). */
+  datePublished?: string;
+  updatedAt?: string;
   views: number;
 }

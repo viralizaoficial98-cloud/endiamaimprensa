@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { getLocale } from "next-intl/server";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { breadcrumbJsonLd, jsonLdGraph } from "@/lib/seo/json-ld";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { JsonLd } from "@/presentation/components/seo/json-ld";
 import { getNewsByCategory } from "@/application/use-cases/news-use-cases";
 import { getAllCategories, getCategoryBySlug } from "@/application/use-cases/category-use-cases";
 import { getCategoryHeroPhoto } from "@/presentation/lib/category-hero-photo";
@@ -23,10 +26,12 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const locale = await getLocale();
   const category = await getCategoryBySlug(slug, locale);
   if (!category) return {};
-  return {
+  return buildPageMetadata({
     title: category.name,
     description: category.description ?? `Notícias da categoria ${category.name} na ENDIAMA E.P.`,
-  };
+    path: `/categoria/${category.slug}`,
+    image: { url: getCategoryHeroPhoto(slug), alt: category.name },
+  });
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
@@ -40,6 +45,11 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <div className="pb-24">
+      <JsonLd
+        data={jsonLdGraph([
+          breadcrumbJsonLd([{ name: "Início", path: "/" }, { name: "Notícias", path: "/noticias" }, { name: category.name }]),
+        ])}
+      />
       <section className="relative flex h-[46vh] min-h-[320px] items-end overflow-hidden bg-brand-950 pb-10 pt-32">
         <Image src={photo} alt={category.name} fill priority fetchPriority="high" sizes="100vw" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />

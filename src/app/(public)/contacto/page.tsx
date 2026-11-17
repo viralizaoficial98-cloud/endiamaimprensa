@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import { HiOutlineEnvelope, HiOutlineMapPin, HiOutlinePhone } from "react-icons/hi2";
 import { getSocialLinks } from "@/application/use-cases/social-link-use-cases";
 import { SocialIcons } from "@/presentation/components/layout/social-icons";
 import { Container } from "@/presentation/components/ui/container";
 import { Reveal } from "@/presentation/components/ui/reveal";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Contacto",
   description: "Contacte a Sala de Imprensa da ENDIAMA E.P. — morada, telefone e email institucionais.",
-};
+  path: "/contacto",
+});
 
 const CONTACT_CARDS = [
   {

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import { Container } from "@/presentation/components/ui/container";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Política de Privacidade",
   description: "Política de privacidade do Portal de Notícias da ENDIAMA E.P.",
-};
+  path: "/politica-de-privacidade",
+});
 
 export default function PrivacyPolicyPage() {
   return (

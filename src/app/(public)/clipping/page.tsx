@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getLocale } from "next-intl/server";
 import { getAllCategories } from "@/application/use-cases/category-use-cases";
 import { listClippings } from "@/application/use-cases/clipping-use-cases";
@@ -6,10 +7,11 @@ import { ClippingExplorer } from "@/presentation/components/clipping/clipping-ex
 import { Container } from "@/presentation/components/ui/container";
 import { Reveal } from "@/presentation/components/ui/reveal";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Clipping",
   description: "Monitorização de media da ENDIAMA E.P. — imprensa escrita, televisão, rádio e portais digitais.",
-};
+  path: "/clipping",
+});
 
 export default async function ClippingPage() {
   const locale = await getLocale();

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getLocale } from "next-intl/server";
 import { getAllCategories } from "@/application/use-cases/category-use-cases";
 import { listNews } from "@/application/use-cases/news-use-cases";
@@ -6,10 +7,11 @@ import { NewsExplorer } from "@/presentation/components/news/news-explorer";
 import { Container } from "@/presentation/components/ui/container";
 import { Reveal } from "@/presentation/components/ui/reveal";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Notícias",
   description: "Todas as notícias do Portal da Sala de Imprensa da ENDIAMA E.P.",
-};
+  path: "/noticias",
+});
 
 const PAGE_SIZE = 12;
 const EMPTY_PAGE = { data: [], pagination: { page: 1, limit: PAGE_SIZE, total: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: false } };

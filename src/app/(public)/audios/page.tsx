@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getLocale } from "next-intl/server";
 import { listAudios } from "@/application/use-cases/audio-use-cases";
 import { getAllCategories } from "@/application/use-cases/category-use-cases";
@@ -6,10 +7,11 @@ import { AudiosExplorer } from "@/presentation/components/audio/audios-explorer"
 import { Container } from "@/presentation/components/ui/container";
 import { Reveal } from "@/presentation/components/ui/reveal";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Áudios",
   description: "Ouça entrevistas, declarações, reportagens e conteúdos institucionais da ENDIAMA E.P.",
-};
+  path: "/audios",
+});
 
 export default async function AudiosPage() {
   const locale = await getLocale();

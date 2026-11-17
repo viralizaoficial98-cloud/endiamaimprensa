@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { articleVideoJsonLd, breadcrumbJsonLd, jsonLdGraph, newsArticleJsonLd } from "@/lib/seo/json-ld";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { absoluteUrl } from "@/lib/site";
 import { getCommentsByNewsId } from "@/application/use-cases/comment-use-cases";
 import { getLatestDocuments } from "@/application/use-cases/document-use-cases";
 import { getAdjacentNews, getLatestNews, getNewsBySlug, getRelatedNews } from "@/application/use-cases/news-use-cases";
@@ -13,6 +16,7 @@ import { CommentsSection } from "@/presentation/components/article/comments-sect
 import { LikeButton } from "@/presentation/components/article/like-button";
 import { ReadingProgressBar } from "@/presentation/components/article/reading-progress-bar";
 import { RelatedNews } from "@/presentation/components/article/related-news";
+import { JsonLd } from "@/presentation/components/seo/json-ld";
 import { TagsList } from "@/presentation/components/article/tags-list";
 import { BookmarkButton } from "@/presentation/components/ui/bookmark-button";
 import { Container } from "@/presentation/components/ui/container";
@@ -36,26 +40,27 @@ export async function generateMetadata({ params }: NewsArticlePageProps): Promis
   const news = await getNewsBySlug(slug, locale);
   if (!news) return {};
 
-  return {
-    title: news.title,
-    description: news.excerpt,
-    alternates: {
-      canonical: `/noticia/${slug}`,
-      languages: { pt: `/noticia/${slug}`, en: `/noticia/${slug}` },
-    },
-    openGraph: {
-      type: "article",
-      title: news.title,
-      description: news.excerpt,
-      images: [{ url: news.coverImage, width: 1600, height: 900, alt: news.coverImageAlt }],
-      publishedTime: news.publishedAt,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: news.title,
-      description: news.excerpt,
-    },
-  };
+  // Editorial SEO overrides are written in Portuguese; the cookie-based EN view
+  // keeps the (translated) article title/excerpt instead.
+  const seo = locale === "pt" ? news.seo : undefined;
+
+  return buildPageMetadata({
+    title: seo?.title || news.title,
+    description: seo?.description || news.excerpt,
+    path: `/noticia/${news.slug}`,
+    canonical: seo?.canonicalUrl,
+    image: { url: seo?.ogImage || news.coverImage, alt: news.coverImageAlt },
+    ogTitle: seo?.ogTitle,
+    ogDescription: seo?.ogDescription,
+    type: "article",
+    publishedTime: news.publishedAt,
+    modifiedTime: news.updatedAt,
+    authors: news.author?.name ? [news.author.name] : undefined,
+    section: news.category.name,
+    tags: news.tags.map((tag) => tag.name),
+    index: news.seo?.index,
+    follow: news.seo?.follow,
+  });
 }
 
 export default async function NewsArticlePage({ params }: NewsArticlePageProps) {
@@ -75,25 +80,21 @@ export default async function NewsArticlePage({ params }: NewsArticlePageProps) 
 
   const relatedVideos = allVideos.filter((video) => video.category.slug === news.category.slug).slice(0, 3);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "NewsArticle",
-    headline: news.title,
-    image: [news.coverImage],
-    datePublished: news.publishedAt,
-    dateModified: news.updatedAt ?? news.publishedAt,
-    author: [{ "@type": "Organization", name: "ENDIAMA E.P." }],
-    publisher: {
-      "@type": "Organization",
-      name: "ENDIAMA E.P.",
-      logo: { "@type": "ImageObject", url: "/images/logotipo_endiama.png" },
-    },
-    description: news.excerpt,
-  };
+  const canonicalUrl = absoluteUrl(news.seo?.canonicalUrl || `/noticia/${news.slug}`);
+  const jsonLd = jsonLdGraph([
+    newsArticleJsonLd(news, canonicalUrl),
+    breadcrumbJsonLd([
+      { name: "Início", path: "/" },
+      { name: "Notícias", path: "/noticias" },
+      { name: news.category.name, path: `/categoria/${news.category.slug}` },
+      { name: news.title },
+    ]),
+    ...articleVideoJsonLd(news.blocks, news),
+  ]);
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <JsonLd data={jsonLd} />
       <ReadingProgressBar />
       <ArticleHero news={news} />
 

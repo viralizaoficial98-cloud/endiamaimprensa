@@ -101,6 +101,16 @@ export function mapNews(dto: NewsDto): News {
     format: (["article", "infographic", "report", "international"] as const).includes(dto.format as News["format"]) ? (dto.format as News["format"]) : "article",
     isBreaking: dto.isBreaking,
     isFeatured: dto.isFeatured,
+    seo: {
+      title: dto.seoTitle?.trim() || undefined,
+      description: dto.seoDescription?.trim() || undefined,
+      canonicalUrl: dto.canonicalUrl?.trim() || undefined,
+      ogTitle: dto.ogTitle?.trim() || undefined,
+      ogDescription: dto.ogDescription?.trim() || undefined,
+      ogImage: dto.ogImage?.trim() ? resolveMediaUrl(dto.ogImage) : undefined,
+      index: dto.robotsIndex ?? true,
+      follow: dto.robotsFollow ?? true,
+    },
   };
 }
 
@@ -130,6 +140,8 @@ export function mapVideo(dto: VideoDto): Video {
     durationSeconds: dto.duration,
     category: mapCategory(dto.category),
     publishedAt: dto.publishedAt ?? new Date().toISOString(),
+    datePublished: dto.publishedAt ?? undefined,
+    updatedAt: dto.updatedAt,
     views: dto.viewsCount,
   };
 }
@@ -172,6 +184,8 @@ export function mapAudio(dto: AudioDto): EndiamaAudio {
     relatedEvent: dto.event ?? undefined,
     isFeatured: dto.isFeatured,
     publishedAt: dto.publishedAt ?? new Date().toISOString(),
+    datePublished: dto.publishedAt ?? undefined,
+    updatedAt: dto.updatedAt,
   };
 }
 
@@ -201,6 +215,7 @@ export function mapGalleryAlbumSummary(dto: GalleryListItemDto): GalleryAlbumSum
     // fall back to their system creation date.
     eventDate: dto.eventDate ?? dto.createdAt,
     photoCount: dto._count.images,
+    updatedAt: dto.updatedAt,
   };
 }
 
@@ -226,6 +241,7 @@ export function mapGalleryAlbum(dto: GalleryDto): GalleryAlbum {
     subcategory: dto.gallerySubcategory ? mapGalleryCategoryRef(dto.gallerySubcategory) : undefined,
     eventDate: dto.eventDate ?? dto.createdAt,
     photoCount: dto.images.length,
+    updatedAt: dto.updatedAt,
     photos: [...dto.images].sort((a, b) => a.order - b.order).map(mapGalleryPhoto),
   };
 }
@@ -247,6 +263,8 @@ export function mapInterview(dto: InterviewDto): Interview {
     videoUrl: dto.videoUrl ?? undefined,
     audioUrl: dto.audioUrl ?? undefined,
     publishedAt: dto.publishedAt ?? new Date().toISOString(),
+    datePublished: dto.publishedAt ?? undefined,
+    updatedAt: dto.updatedAt,
   };
 }
 
@@ -273,6 +291,7 @@ export function mapEvent(dto: EventDto): EndiamaEvent {
     capacity: dto.capacity ?? undefined,
     isFeatured: dto.isFeatured ?? false,
     category: FALLBACK_CATEGORY,
+    updatedAt: dto.updatedAt,
   };
 }
 

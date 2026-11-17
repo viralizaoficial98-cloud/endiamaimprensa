@@ -31,6 +31,19 @@ export interface NewsBlock {
   thumbnailUrl?: string;
 }
 
+/** Editorial SEO overrides set in the admin form. Every field is optional:
+ * the public pages fall back to title/excerpt/cover image when empty. */
+export interface NewsSeo {
+  title?: string;
+  description?: string;
+  canonicalUrl?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  index: boolean;
+  follow: boolean;
+}
+
 export interface News {
   id: string;
   slug: string;
@@ -54,4 +67,5 @@ export interface News {
   galleryImages?: string[];
   relatedVideoIds?: string[];
   documentIds?: string[];
+  seo?: NewsSeo;
 }

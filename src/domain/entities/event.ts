@@ -22,4 +22,5 @@ export interface EndiamaEvent {
   capacity?: number;
   isFeatured: boolean;
   category: Category;
+  updatedAt?: string;
 }

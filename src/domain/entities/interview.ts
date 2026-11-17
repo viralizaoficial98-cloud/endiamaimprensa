@@ -17,4 +17,7 @@ export interface Interview {
   videoUrl?: string;
   audioUrl?: string;
   publishedAt: string;
+  /** Real publication date from the CMS (publishedAt above falls back to "now" for display). */
+  datePublished?: string;
+  updatedAt?: string;
 }
