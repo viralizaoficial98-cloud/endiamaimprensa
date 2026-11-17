@@ -53,6 +53,8 @@ const EVENT_LIST_SELECT = {
   contactPhone: true,
   capacity: true,
   isFeatured: true,
+  // Real modification date for the public sitemap's <lastmod>.
+  updatedAt: true,
 } as const;
 
 export const eventsPublicRouter = Router();

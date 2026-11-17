@@ -39,6 +39,8 @@ const AUDIO_LIST_SELECT = {
   location: true,
   isFeatured: true,
   publishedAt: true,
+  // Real modification date for the public sitemap's <lastmod>.
+  updatedAt: true,
 } as const;
 
 export const audiosPublicRouter = Router();
