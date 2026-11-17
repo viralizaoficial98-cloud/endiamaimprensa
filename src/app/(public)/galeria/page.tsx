@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getGalleryCategories, listGalleryAlbums } from "@/application/use-cases/gallery-use-cases";
 import { GalleryAlbumExplorer } from "@/presentation/components/gallery/gallery-album-explorer";
 import { Container } from "@/presentation/components/ui/container";
 import { Reveal } from "@/presentation/components/ui/reveal";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Galeria",
   description: "Galeria premium de fotografia da ENDIAMA E.P. — Conselho de Administração, Directores e Delegados e Indústria Diamantífera.",
-};
+  path: "/galeria",
+});
 
 const PAGE_SIZE = 12;
 

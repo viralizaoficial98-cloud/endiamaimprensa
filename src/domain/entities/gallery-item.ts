@@ -29,6 +29,7 @@ export interface GalleryAlbumSummary {
   /** Editorial/original date of the album (never the migration/createdAt date). */
   eventDate: string;
   photoCount: number;
+  updatedAt?: string;
 }
 
 export interface GalleryAlbum extends GalleryAlbumSummary {

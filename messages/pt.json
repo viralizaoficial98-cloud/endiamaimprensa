@@ -99,5 +99,12 @@
     "subscribe": "Subscrever",
     "success": "Subscrição registada. Verifique o seu email para confirmar.",
     "error": "Não foi possível subscrever. Tente novamente."
+  },
+  "consent": {
+    "title": "Estatísticas de utilização",
+    "message": "Com a sua autorização, utilizamos o Google Analytics para medir de forma agregada a utilização do portal e melhorar os conteúdos. Pode recusar sem qualquer impacto na navegação.",
+    "privacyLink": "Política de Privacidade",
+    "accept": "Aceitar",
+    "reject": "Recusar"
   }
 }

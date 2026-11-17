@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import { Container } from "@/presentation/components/ui/container";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Termos de Utilização",
   description: "Termos de utilização do Portal de Notícias da ENDIAMA E.P.",
-};
+  path: "/termos-de-utilizacao",
+});
 
 export default function TermsOfUsePage() {
   return (

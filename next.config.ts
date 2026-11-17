@@ -24,6 +24,20 @@ function backendRemotePattern() {
 
 const backendPattern = backendRemotePattern();
 
+// Conservative security headers for every response. Deliberately NOT included:
+//  - Content-Security-Policy: the portal embeds YouTube/Vimeo, loads media from
+//    the backend origin and uses inline JSON-LD; a CSP needs to be trialled in
+//    Report-Only mode against the live site first (see docs/seo-auditoria).
+//  - HSTS includeSubDomains/preload: other *.endiamaimprensa.com hosts may not
+//    all serve HTTPS; enabling those is an infrastructure decision.
+const SECURITY_HEADERS = [
+  { key: "Strict-Transport-Security", value: "max-age=31536000" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
+];
+
 const nextConfig: NextConfig = {
   // Next.js's own self-contained server (next build generates
   // .next/standalone/server.js) — the officially documented, robust way to
@@ -36,6 +50,22 @@ const nextConfig: NextConfig = {
   // still need copying into .next/standalone after build — see the
   // "postbuild" npm script.
   output: "standalone",
+  poweredByHeader: false,
+  async headers() {
+    return [
+      { source: "/:path*", headers: SECURITY_HEADERS },
+      // Header-level safeguard on top of the admin layout's noindex metadata.
+      { source: "/admin", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+      { source: "/admin/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+      // Static photographs/fallbacks in public/images: cache for a week, then
+      // revalidate in the background (files there can be replaced in place,
+      // so not "immutable" like /_next/static).
+      {
+        source: "/images/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" }],
+      },
+    ];
+  },
   allowedDevOrigins: ["localhost", "127.0.0.1", ...(backendPattern ? [backendPattern.hostname] : [])],
   images: {
     formats: ["image/avif", "image/webp"],

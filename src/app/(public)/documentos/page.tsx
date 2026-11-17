@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import { getLocale } from "next-intl/server";
 import { getAllCategories } from "@/application/use-cases/category-use-cases";
 import { listDocuments } from "@/application/use-cases/document-use-cases";
@@ -6,10 +7,11 @@ import { DocumentsExplorer } from "@/presentation/components/documents/documents
 import { Container } from "@/presentation/components/ui/container";
 import { Reveal } from "@/presentation/components/ui/reveal";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Documentos",
   description: "Biblioteca documental institucional da ENDIAMA E.P. — relatórios, planos estratégicos e dados oficiais.",
-};
+  path: "/documentos",
+});
 
 export default async function DocumentosPage() {
   const locale = await getLocale();

@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import { listHistoricalNews } from "@/application/use-cases/historical-news-use-cases";
 import { HistoricalArchiveExplorer } from "@/presentation/components/historical-archive/historical-archive-explorer";
 import { Container } from "@/presentation/components/ui/container";
 import { Reveal } from "@/presentation/components/ui/reveal";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Arquivo Histórico de Notícias",
   description: "Consulte o arquivo histórico de notícias da ENDIAMA E.P., preservado a partir do antigo portal de imprensa.",
-};
+  path: "/arquivo-historico",
+});
 
 const PAGE_SIZE = 12;
 const EMPTY_PAGE = { data: [], pagination: { page: 1, limit: PAGE_SIZE, total: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: false } };

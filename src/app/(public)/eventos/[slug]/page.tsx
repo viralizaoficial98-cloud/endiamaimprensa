@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { breadcrumbJsonLd, eventJsonLd, jsonLdGraph } from "@/lib/seo/json-ld";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { absoluteUrl } from "@/lib/site";
+import { JsonLd } from "@/presentation/components/seo/json-ld";
 import {
   HiOutlineArrowLeft,
   HiOutlineCalendarDays,
@@ -27,22 +31,25 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
   const event = await getEventBySlug(slug).catch(() => null);
   if (!event) return {};
 
-  return {
+  return buildPageMetadata({
     title: event.title,
-    description: event.description,
-    openGraph: {
-      type: "article",
-      title: event.title,
-      description: event.description,
-      images: [{ url: event.imageUrl, width: 1600, height: 900, alt: event.title }],
-    },
-  };
+    description: event.description || `${event.title} — ${event.location}. Evento institucional da ENDIAMA E.P.`,
+    path: `/eventos/${event.slug}`,
+    image: event.imageUrl ? { url: event.imageUrl, alt: event.title } : null,
+    type: "website",
+  });
 }
 
 export default async function EventPage({ params }: EventPageProps) {
   const { slug } = await params;
   const event = await getEventBySlug(slug).catch(() => null);
   if (!event) notFound();
+
+  const canonicalUrl = absoluteUrl(`/eventos/${event.slug}`);
+  const jsonLd = jsonLdGraph([
+    eventJsonLd(event, canonicalUrl),
+    breadcrumbJsonLd([{ name: "Início", path: "/" }, { name: "Eventos", path: "/eventos" }, { name: event.title }]),
+  ]);
 
   const details = [
     { icon: HiOutlineCalendarDays, label: FULL_DATE_FORMATTER.format(new Date(event.startsAt)) },
@@ -55,6 +62,7 @@ export default async function EventPage({ params }: EventPageProps) {
 
   return (
     <div className="pb-20 pt-32 sm:pt-36">
+      <JsonLd data={jsonLd} />
       <Container>
         <Reveal>
           <Link href="/eventos" className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-foreground/60 transition-colors hover:text-brand-600">

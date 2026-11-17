@@ -14,4 +14,7 @@ export interface EndiamaAudio {
   relatedEvent?: { id: string; title: string; slug: string };
   isFeatured: boolean;
   publishedAt: string;
+  /** Real publication date from the CMS (publishedAt above falls back to "now" for display). */
+  datePublished?: string;
+  updatedAt?: string;
 }

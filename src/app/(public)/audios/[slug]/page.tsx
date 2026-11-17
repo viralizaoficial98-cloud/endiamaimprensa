@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { audioJsonLd, breadcrumbJsonLd, jsonLdGraph } from "@/lib/seo/json-ld";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { absoluteUrl } from "@/lib/site";
+import { JsonLd } from "@/presentation/components/seo/json-ld";
 import { HiOutlineArrowLeft, HiOutlineCalendarDays, HiOutlineMapPin, HiOutlineMicrophone, HiOutlineTicket } from "react-icons/hi2";
 import { getAudioBySlug, listAudios } from "@/application/use-cases/audio-use-cases";
 import { formatDate } from "@/lib/format";
@@ -21,22 +25,28 @@ export async function generateMetadata({ params }: AudioPageProps): Promise<Meta
   const audio = await getAudioBySlug(slug).catch(() => null);
   if (!audio) return {};
 
-  return {
+  return buildPageMetadata({
     title: audio.title,
-    description: audio.description,
-    openGraph: {
-      type: "article",
-      title: audio.title,
-      description: audio.description,
-      images: [{ url: audio.coverImage, width: 1600, height: 900, alt: audio.title }],
-    },
-  };
+    description: audio.description || `${audio.title} — áudio da Sala de Imprensa da ENDIAMA E.P.`,
+    path: `/audios/${audio.slug}`,
+    image: { url: audio.coverImage, alt: audio.title },
+    type: "article",
+    publishedTime: audio.datePublished,
+    modifiedTime: audio.updatedAt,
+    section: audio.category?.name,
+  });
 }
 
 export default async function AudioPage({ params }: AudioPageProps) {
   const { slug } = await params;
   const audio = await getAudioBySlug(slug).catch(() => null);
   if (!audio) notFound();
+
+  const canonicalUrl = absoluteUrl(`/audios/${audio.slug}`);
+  const jsonLd = jsonLdGraph([
+    audioJsonLd(audio, canonicalUrl),
+    breadcrumbJsonLd([{ name: "Início", path: "/" }, { name: "Áudios", path: "/audios" }, { name: audio.title }]),
+  ]);
 
   const { data: pool } = await listAudios({ limit: 12 }).catch(() => ({ data: [], pagination: { page: 1, limit: 12, total: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: false } }));
   const related = pool.filter((a) => a.id !== audio.id).slice(0, 3);
@@ -49,6 +59,7 @@ export default async function AudioPage({ params }: AudioPageProps) {
 
   return (
     <div className="pb-20 pt-32 sm:pt-36">
+      <JsonLd data={jsonLd} />
       <Container>
         <Reveal>
           <Link href="/audios" className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-foreground/60 transition-colors hover:text-brand-600">

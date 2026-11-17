@@ -99,5 +99,12 @@
     "subscribe": "Subscribe",
     "success": "Subscription confirmed. Check your email to verify it.",
     "error": "Could not subscribe. Please try again."
+  },
+  "consent": {
+    "title": "Usage statistics",
+    "message": "With your permission, we use Google Analytics to measure aggregate use of the portal and improve its content. You can decline with no impact on browsing.",
+    "privacyLink": "Privacy Policy",
+    "accept": "Accept",
+    "reject": "Decline"
   }
 }

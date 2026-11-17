@@ -74,7 +74,7 @@ export function VideoPlayerPremium({ video }: { video: Video }) {
           <Image src="/images/logotipo_endiama.png" alt="ENDIAMA" fill sizes="48px" className="scale-150 object-contain" />
         </div>
         <div>
-          <h1 className="font-heading text-xl font-medium text-foreground sm:text-2xl">{video.title}</h1>
+          <h2 className="font-heading text-xl font-medium text-foreground sm:text-2xl">{video.title}</h2>
           <p className="mt-1 text-sm text-foreground/50">
             {formatCompactNumber(video.views)} visualizações · {formatDate(video.publishedAt)}
           </p>

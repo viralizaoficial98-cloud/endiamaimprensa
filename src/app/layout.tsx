@@ -3,6 +3,7 @@ import { Fraunces, Manrope } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { ThemeProvider } from "@/presentation/providers/theme-provider";
+import { DEFAULT_OG_IMAGE, ORGANIZATION_NAME, SITE_LOCALE, SITE_NAME, SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
@@ -21,16 +22,18 @@ const body = Manrope({
   display: "swap",
 });
 
-const SITE_URL = "https://imprensa.endiama.co.ao";
+const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
+const bingVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION?.trim();
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: "ENDIAMA Notícias — Sala de Imprensa da ENDIAMA E.P.",
-    template: "%s — ENDIAMA Notícias",
+    template: `%s — ${SITE_NAME}`,
   },
   description:
     "Portal de notícias oficial da ENDIAMA E.P. — Empresa Nacional de Diamantes de Angola. Cobertura do sector mineiro, mercado diamantífero, sustentabilidade e responsabilidade social.",
+  applicationName: SITE_NAME,
   keywords: [
     "ENDIAMA",
     "diamantes",
@@ -40,24 +43,32 @@ export const metadata: Metadata = {
     "sector mineiro angolano",
     "notícias",
   ],
-  authors: [{ name: "ENDIAMA E.P." }],
+  authors: [{ name: ORGANIZATION_NAME }],
+  publisher: ORGANIZATION_NAME,
   openGraph: {
     type: "website",
-    locale: "pt_AO",
+    locale: SITE_LOCALE,
     url: SITE_URL,
-    siteName: "ENDIAMA Notícias",
+    siteName: SITE_NAME,
     title: "ENDIAMA Notícias — Sala de Imprensa da ENDIAMA E.P.",
     description:
       "Portal de notícias oficial da ENDIAMA E.P. — cobertura do sector mineiro e diamantífero angolano.",
-    images: [{ url: "/images/logotipo_endiama.png", width: 1200, height: 630, alt: "ENDIAMA" }],
+    images: [{ url: DEFAULT_OG_IMAGE.url, width: DEFAULT_OG_IMAGE.width, height: DEFAULT_OG_IMAGE.height, alt: ORGANIZATION_NAME }],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "ENDIAMA Notícias",
     description: "Portal de notícias oficial da ENDIAMA E.P.",
+    images: [DEFAULT_OG_IMAGE.url],
   },
   icons: {
     icon: "/images/logotipo_endiama.png",
+  },
+  // Search Console / Bing Webmaster ownership tags — emitted only when the
+  // corresponding env var is set (see .env.example).
+  verification: {
+    ...(googleVerification ? { google: googleVerification } : {}),
+    ...(bingVerification ? { other: { "msvalidate.01": bingVerification } } : {}),
   },
 };
 

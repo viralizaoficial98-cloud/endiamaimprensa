@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { breadcrumbJsonLd, interviewJsonLd, jsonLdGraph } from "@/lib/seo/json-ld";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { absoluteUrl } from "@/lib/site";
+import { JsonLd } from "@/presentation/components/seo/json-ld";
 import { HiOutlineMicrophone, HiOutlineVideoCamera } from "react-icons/hi2";
 import { getInterviewBySlug, getLatestInterviews } from "@/application/use-cases/interview-use-cases";
 import { ArticleBody } from "@/presentation/components/article/article-body";
@@ -24,17 +28,17 @@ export async function generateMetadata({ params }: InterviewPageProps): Promise<
   const interview = await getInterviewBySlug(slug);
   if (!interview) return {};
 
-  return {
+  return buildPageMetadata({
     title: interview.title,
     description: interview.excerpt,
-    openGraph: {
-      type: "article",
-      title: interview.title,
-      description: interview.excerpt,
-      images: [{ url: interview.coverImage, width: 1600, height: 900, alt: interview.title }],
-      publishedTime: interview.publishedAt,
-    },
-  };
+    path: `/entrevistas/${interview.slug}`,
+    image: { url: interview.coverImage, alt: interview.title },
+    type: "article",
+    publishedTime: interview.datePublished,
+    modifiedTime: interview.updatedAt,
+    authors: interview.interviewerName ? [interview.interviewerName] : undefined,
+    section: interview.category?.name,
+  });
 }
 
 export default async function InterviewPage({ params }: InterviewPageProps) {
@@ -42,8 +46,16 @@ export default async function InterviewPage({ params }: InterviewPageProps) {
   const interview = await getInterviewBySlug(slug);
   if (!interview) notFound();
 
+  const canonicalUrl = absoluteUrl(`/entrevistas/${interview.slug}`);
+
   return (
     <div className="pb-24 pt-32 sm:pt-36">
+      <JsonLd
+        data={jsonLdGraph([
+          interviewJsonLd(interview, canonicalUrl),
+          breadcrumbJsonLd([{ name: "Início", path: "/" }, { name: "Entrevistas", path: "/entrevistas" }, { name: interview.title }]),
+        ])}
+      />
       <div className="relative h-[46vh] min-h-[340px] w-full overflow-hidden">
         <Image src={interview.coverImage} alt={interview.title} fill priority fetchPriority="high" sizes="100vw" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
