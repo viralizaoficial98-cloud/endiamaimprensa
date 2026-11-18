@@ -34,7 +34,9 @@ import { NextResponse } from "next/server";
 // is best-effort and swallows errors) — this guarantees that can't happen
 // regardless of proxy header quirks, without weakening the check for anyone
 // else (a third-party site still cannot forge this exact Origin value).
-const KNOWN_PRODUCTION_HOSTS = ["novo.endiamaimprensa.com"];
+// Both hosts: the official one is www.*, but the admin may still be opened on
+// the bare host until the Apache non-www → www redirect is in place.
+const KNOWN_PRODUCTION_HOSTS = ["www.novo.endiamaimprensa.com", "novo.endiamaimprensa.com"];
 
 function isSameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");

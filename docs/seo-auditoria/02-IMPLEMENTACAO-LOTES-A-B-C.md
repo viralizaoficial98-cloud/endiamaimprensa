@@ -1,7 +1,7 @@
 # Sala de Imprensa ENDIAMA E.P. — Implementação dos Lotes A, B e C
 
 **Data:** 2026-11-17 · **Ramo:** `claude/practical-dijkstra-v5sl7o`
-**Decisões aprovadas:** domínio canónico `https://novo.endiamaimprensa.com` · inglês mantido por cookie (só PT indexável, sem hreflang) · Lotes A+B+C · GA4 preparado e desligado.
+**Decisões aprovadas:** domínio canónico `https://www.novo.endiamaimprensa.com` (actualizado em 2026-11-18; inicialmente sem www) · inglês mantido por cookie (só PT indexável, sem hreflang) · Lotes A+B+C · GA4 preparado e desligado.
 
 > Etapa 5 (Homologação): **nada foi publicado em produção.** As alterações estão no ramo acima, para revisão e aprovação.
 > Matriz completa por requisito: [`Technical_Checklist_ENDIAMA_avaliado.xlsx`](./Technical_Checklist_ENDIAMA_avaliado.xlsx) (colunas *QA* e *Comments* preenchidas).
@@ -29,7 +29,7 @@ Os 6 "Não Conforme" restantes (sitemap HTML, SearchAction, paginação/filtros 
 ### Lote A — Fundações SEO
 | # | Melhoria | Problema resolvido |
 |---|---|---|
-| A1 | Configuração central `src/lib/site.ts` (`NEXT_PUBLIC_SITE_URL`, por omissão `https://novo.endiamaimprensa.com`) | C1 — canonicals, OG, robots e sitemap apontavam para `imprensa.endiama.co.ao` |
+| A1 | Configuração central `src/lib/site.ts` (`NEXT_PUBLIC_SITE_URL`, por omissão `https://www.novo.endiamaimprensa.com`) | C1 — canonicals, OG, robots e sitemap apontavam para `imprensa.endiama.co.ao` |
 | A2 | Helper `buildPageMetadata()` aplicado a **todas** as páginas públicas: canonical absoluto, Open Graph completo (`og:url`, `site_name`, `locale`, imagem), Twitter Card | C7 |
 | A3 | Notícias usam os campos SEO **já existentes** na BD (`seoTitle`, `seoDescription`, `ogTitle`, `ogDescription`, `ogImage`, `canonicalUrl`, `robotsIndex`, `robotsFollow`), com fallback para título/resumo/capa | Campos gravados pelo admin mas ignorados pelo site |
 | A4 | Removido o hreflang inválido (PT e EN no mesmo URL) | C2 |
@@ -158,7 +158,7 @@ Ambiente: build de produção (`next build` + `next start`) contra uma **API sim
    cp -a .next/standalone ~/standalone-backup-$(date +%F)
    ```
 2. **Variáveis do frontend** (Node Selector → app do frontend), *antes* do build:
-   - `NEXT_PUBLIC_SITE_URL=https://novo.endiamaimprensa.com`
+   - `NEXT_PUBLIC_SITE_URL=https://www.novo.endiamaimprensa.com`
    - (opcional) `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`, `NEXT_PUBLIC_BING_SITE_VERIFICATION`
    - **não** definir `NEXT_PUBLIC_GA_MEASUREMENT_ID` até haver autorização e a Política de Privacidade estar actualizada.
 3. **Actualizar o código** (após *merge* do ramo para `main`):
@@ -177,13 +177,13 @@ Ambiente: build de produção (`next build` + `next start`) contra uma **API sim
    Node Selector → Restart da app do frontend.
 6. **Verificação pós-deploy** (5 minutos):
    ```bash
-   curl -sI https://novo.endiamaimprensa.com/ | grep -iE "strict-transport|x-frame|x-content"
-   curl -s https://novo.endiamaimprensa.com/robots.txt
-   curl -s https://novo.endiamaimprensa.com/sitemap.xml
-   curl -s https://novo.endiamaimprensa.com/news-sitemap.xml | head -c 600
-   curl -sI https://novo.endiamaimprensa.com/admin/login | grep -i x-robots-tag
+   curl -sI https://www.novo.endiamaimprensa.com/ | grep -iE "strict-transport|x-frame|x-content"
+   curl -s https://www.novo.endiamaimprensa.com/robots.txt
+   curl -s https://www.novo.endiamaimprensa.com/sitemap.xml
+   curl -s https://www.novo.endiamaimprensa.com/news-sitemap.xml | head -c 600
+   curl -sI https://www.novo.endiamaimprensa.com/admin/login | grep -i x-robots-tag
    ```
-   Abrir uma notícia real → ver código-fonte → confirmar `<link rel="canonical" href="https://novo.endiamaimprensa.com/noticia/...">` e o bloco `application/ld+json`.
+   Abrir uma notícia real → ver código-fonte → confirmar `<link rel="canonical" href="https://www.novo.endiamaimprensa.com/noticia/...">` e o bloco `application/ld+json`.
    Publicar ou editar uma notícia no admin → confirmar que aparece em `/sitemaps/noticias.xml`.
 7. **Validação externa:** testar 1 notícia, 1 evento e a página `/videos` no [Rich Results Test](https://search.google.com/test/rich-results) e no [Schema Markup Validator](https://validator.schema.org/).
 8. **Rollback** (se necessário): `git checkout $(cat ~/deploy-anterior.txt)`, `npm run build` no frontend e no backend, e Restart. Não há alterações de base de dados a reverter.
@@ -193,19 +193,19 @@ Ambiente: build de produção (`next build` + `next start`) contra uma **API sim
 ## 8. Configurações externas (fora do código)
 
 **Google Search Console / Bing Webmaster Tools**
-1. Criar a propriedade `https://novo.endiamaimprensa.com` (prefixo de URL) e, se possível, a propriedade de domínio via DNS.
+1. Criar a propriedade `https://www.novo.endiamaimprensa.com` (prefixo de URL) e, se possível, a propriedade de domínio via DNS.
 2. Método "Meta tag": copiar só o valor `content` para `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` (no Bing, `NEXT_PUBLIC_BING_SITE_VERIFICATION`), fazer build + Restart e clicar em "Verificar".
-3. Submeter **apenas** `https://novo.endiamaimprensa.com/sitemap.xml` (o índice inclui os restantes). No Bing é possível importar a partir do GSC.
+3. Submeter **apenas** `https://www.novo.endiamaimprensa.com/sitemap.xml` (o índice inclui os restantes). No Bing é possível importar a partir do GSC.
 4. Acompanhar: Páginas → Indexação, Sitemaps, Melhorias (Breadcrumbs, Vídeos), Core Web Vitals, Desempenho (consultas e dispositivos).
 
 **Apache (cPanel) — HTTPS e host único.** Verificar primeiro se já existe (cPanel → Domínios → "Forçar redireccionamento HTTPS"). Só se não existir, acrescentar no **início** do `.htaccess` do domínio, mantendo as regras de proxy existentes:
 ```apache
 RewriteEngine On
-RewriteCond %{HTTPS} !=on
-RewriteRule ^ https://novo.endiamaimprensa.com%{REQUEST_URI} [L,R=301]
-RewriteCond %{HTTP_HOST} ^www\.novo\.endiamaimprensa\.com$ [NC]
-RewriteRule ^ https://novo.endiamaimprensa.com%{REQUEST_URI} [L,R=301]
+# Qualquer pedido sem HTTPS ou sem www → https://www.novo.endiamaimprensa.com (301, um só salto)
+RewriteCond %{HTTPS} !=on [OR]
+RewriteCond %{HTTP_HOST} ^novo\.endiamaimprensa\.com$ [NC]
+RewriteRule ^ https://www.novo.endiamaimprensa.com%{REQUEST_URI} [L,R=301]
 ```
-Testar com `curl -sI http://novo.endiamaimprensa.com/` (deve devolver 301 para https).
+Testar com `curl -sI http://novo.endiamaimprensa.com/` e `curl -sI https://novo.endiamaimprensa.com/` (ambos devem devolver 301 para `https://www.novo.endiamaimprensa.com/`). **Pré-requisito:** o subdomínio `www.novo.endiamaimprensa.com` tem de resolver no DNS e ter certificado SSL válido (cPanel → SSL/TLS Status → AutoSSL).
 
 **Mudança futura de domínio** (por exemplo, quando o portal passar para `endiamaimprensa.com`): alterar `NEXT_PUBLIC_SITE_URL`, fazer build e configurar redireccionamentos 301 do domínio antigo para o novo, URL a URL.

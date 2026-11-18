@@ -8,7 +8,7 @@
  * code change. NEXT_PUBLIC_* values are inlined at build time, so a change
  * requires `npm run build` + restart.
  */
-const DEFAULT_SITE_URL = "https://novo.endiamaimprensa.com";
+const DEFAULT_SITE_URL = "https://www.novo.endiamaimprensa.com";
 
 function normaliseSiteUrl(raw: string | undefined): string {
   const value = (raw ?? "").trim();
